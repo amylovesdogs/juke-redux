@@ -1,8 +1,8 @@
 import React from 'react';
 import store from "../store";
 import Lyrics from "../components/Lyrics";
-import { setLyrics } from "../action-creators/lyrics";
-import axios from 'axios';
+import { fetchLyrics } from "../action-creators/lyrics";
+
 
 const initialState = {
   lyrics: '',
@@ -14,10 +14,11 @@ class LyricsContainer extends React.Component {
 
   constructor (props) {
     super(props);
-    this.state = Object.assign({},initialState,store.getState());
+    this.state = Object.assign({},initialState,this.getStoreSlice());
     this.setArtist = this.setArtist.bind(this);
     this.setSong = this.setSong.bind(this);
     this.submit = this.submit.bind(this);
+    console.log("initial state: ", this.state);
   }
 
   setArtist(artist) {
@@ -29,33 +30,23 @@ class LyricsContainer extends React.Component {
   }
 
   submit() {
-    console.log("in submit");
-    axios.get(`/api/lyrics/${this.state.artistQuery}/${this.state.songQuery}`)
-    .then(response=>{
-      console.log("got back lyrics: ",response.data)
-      console.log("passing in: ",response.data.lyric);
-      console.log("setLyrics: ",setLyrics);
-      let action = setLyrics(response.data.lyric);
-      console.log("action is ",action);
-      store.dispatch(action);
-    })
-    .catch(err => console.log(err));
+    store.dispatch(fetchLyrics(this.state.artistQuery,this.state.songQuery));
   }
 
   getStoreSlice () {
     const currentState = store.getState();
     console.log("In slice, got state: ",currentState);
     return {
-        lyrics: currentState.lyrics
+        lyrics: currentState.lyrics.lyrics
     };
   }
 
   componentDidMount() {
       this.unsubscribe = store.subscribe(() => {
           let slice = this.getStoreSlice();
-          console.log("slice is",slice);
+          // console.log("slice is",slice);
           this.setState(slice);
-          console.log("state is: ",this.state);
+          // console.log("state is: ",this.state);
       });
   }
 
@@ -64,6 +55,7 @@ class LyricsContainer extends React.Component {
   }
 
   render () {
+    console.log("Lyrics state: ",this.state);
     return (
       <Lyrics lyrics={this.state.lyrics}
               setArtist={this.setArtist}

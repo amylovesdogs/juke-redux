@@ -2,7 +2,7 @@ import {SET_LYRICS} from '../constants';
 
 const initialState = { lyrics: '' };
 
-export default function rootReducer (prevState = initialState, action) {
+export default function lyricReducer (prevState = initialState, action) {
   if (!action) return prevState;
 
   switch (action.type) {
